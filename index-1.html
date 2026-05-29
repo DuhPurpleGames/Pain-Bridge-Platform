@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Pain Bridge Platform | AugustusJulius</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@700;900&family=Rajdhani:wght@400;500;600;700&family=Share+Tech+Mono&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="css/theme-base.css"/>
+  <link rel="stylesheet" href="css/theme-components.css"/>
+</head>
+<body class="bg-black text-white font-rajdhani overflow-hidden h-screen flex flex-col">
+
+  <!-- HEADER -->
+  <header id="app-header" class="flex items-center justify-between px-6 py-3 border-b border-gold/30 bg-black/90 backdrop-blur-sm z-50 flex-shrink-0">
+    <div class="flex items-center gap-4">
+      <div class="logo-mark">
+        <span class="font-cinzel text-gold text-xl tracking-widest">AJ</span>
+      </div>
+      <div>
+        <h1 class="font-cinzel text-gold text-sm tracking-[0.3em] uppercase">Pain Bridge Platform</h1>
+        <p class="text-[10px] text-gray-500 tracking-widest uppercase">Multi-Agent Intelligence · AugustusJulius.com</p>
+      </div>
+    </div>
+    <div class="flex items-center gap-4">
+      <div id="status-orb" class="flex items-center gap-2">
+        <span class="pulse-dot bg-emerald-400"></span>
+        <span class="text-xs text-emerald-400 tracking-widest uppercase font-mono">Live</span>
+      </div>
+      <div id="wallet-display" class="wallet-pill cursor-pointer" onclick="openWallet()">
+        <span class="text-xs text-gray-400 mr-1">BALANCE</span>
+        <span id="wallet-balance" class="text-gold font-mono font-bold text-sm">$0.00</span>
+        <button class="ml-2 bg-gold/20 hover:bg-gold/40 text-gold text-xs px-2 py-0.5 rounded border border-gold/40 transition-all">+ADD</button>
+      </div>
+      <div id="auth-area">
+        <button onclick="openAuth('login')" class="btn-ghost text-xs mr-2">LOGIN</button>
+        <button onclick="openAuth('register')" class="btn-gold text-xs">REGISTER</button>
+      </div>
+      <div id="user-area" class="hidden items-center gap-3">
+        <span id="user-name-display" class="text-xs text-gray-300 font-mono"></span>
+        <button onclick="logout()" class="btn-ghost text-xs">LOGOUT</button>
+      </div>
+    </div>
+  </header>
+
+  <!-- MAIN LAYOUT -->
+  <main class="flex flex-1 overflow-hidden">
+
+    <!-- LEFT: AGENT CHAT -->
+    <section class="flex flex-col w-[58%] border-r border-gold/20 overflow-hidden">
+
+      <!-- Agent Selector -->
+      <div class="flex items-center gap-2 px-4 py-2 border-b border-gold/10 bg-black/60 flex-shrink-0 overflow-x-auto scrollbar-hide">
+        <span class="text-[10px] text-gray-500 uppercase tracking-widest mr-2 whitespace-nowrap">AI Agents:</span>
+        <div id="agent-tabs" class="flex gap-2">
+          <!-- injected by agents.js -->
+        </div>
+      </div>
+
+      <!-- Active Agent Info -->
+      <div id="agent-info-bar" class="flex items-center gap-3 px-4 py-2 border-b border-gold/10 bg-black/40 flex-shrink-0">
+        <div id="agent-avatar" class="agent-avatar-sm"></div>
+        <div>
+          <div id="agent-name-bar" class="text-xs font-bold text-gold tracking-widest uppercase"></div>
+          <div id="agent-title-bar" class="text-[10px] text-gray-400"></div>
+        </div>
+        <div class="ml-auto flex items-center gap-3">
+          <span class="text-[10px] text-gray-500">Per response: <span class="text-amber-400 font-mono">$0.50</span></span>
+          <span class="text-[10px] text-gray-500">Full Audit: <span class="text-amber-400 font-mono">$2.00</span></span>
+        </div>
+      </div>
+
+      <!-- Chat Window -->
+      <div id="chat-window" class="flex-1 overflow-y-auto px-4 py-4 space-y-4 scroll-smooth">
+        <!-- welcome injected by chat.js -->
+      </div>
+
+      <!-- Input Area -->
+      <div class="flex-shrink-0 border-t border-gold/20 bg-black/80 p-4">
+        <div class="flex gap-3 items-end">
+          <div class="flex-1">
+            <textarea id="chat-input"
+              placeholder="Describe your business pain, gap, or challenge... or request a full audit"
+              class="w-full bg-gray-900/80 border border-gold/20 rounded-lg text-sm text-gray-200 placeholder-gray-600 p-3 resize-none focus:outline-none focus:border-gold/60 font-rajdhani h-16 transition-all"
+              onkeydown="handleInputKey(event)"></textarea>
+          </div>
+          <div class="flex flex-col gap-2">
+            <button onclick="sendMessage()" id="send-btn" class="btn-gold px-4 py-2 text-xs whitespace-nowrap">
+              ASK · $0.50
+            </button>
+            <button onclick="requestAudit()" class="btn-emerald px-4 py-2 text-xs whitespace-nowrap">
+              AUDIT · $2.00
+            </button>
+          </div>
+        </div>
+        <div id="input-status" class="text-[10px] text-gray-600 mt-1 text-right"></div>
+      </div>
+    </section>
+
+    <!-- RIGHT: LOGS + ACTIONS -->
+    <section class="flex flex-col w-[42%] overflow-hidden bg-black/40">
+
+      <!-- Tab Nav -->
+      <div class="flex border-b border-gold/20 flex-shrink-0">
+        <button onclick="switchRightTab('logs')" id="tab-logs" class="right-tab active-tab">LIVE LOGS</button>
+        <button onclick="switchRightTab('actions')" id="tab-actions" class="right-tab">ACTIONS</button>
+        <button onclick="switchRightTab('reports')" id="tab-reports" class="right-tab">REPORTS</button>
+        <button onclick="switchRightTab('solutions')" id="tab-solutions" class="right-tab">SOLUTIONS</button>
+      </div>
+
+      <!-- Tab Panels -->
+      <div class="flex-1 overflow-y-auto">
+        <div id="panel-logs" class="panel-content p-3 space-y-1">
+          <!-- injected by logger.js -->
+        </div>
+        <div id="panel-actions" class="panel-content hidden p-3 space-y-2">
+          <!-- injected by actions.js -->
+        </div>
+        <div id="panel-reports" class="panel-content hidden p-3 space-y-3">
+          <!-- injected by reports.js -->
+        </div>
+        <div id="panel-solutions" class="panel-content hidden p-3 space-y-3">
+          <!-- injected by solutions.js -->
+        </div>
+      </div>
+
+      <!-- Bottom Stats -->
+      <div class="flex-shrink-0 border-t border-gold/20 bg-black/60 px-4 py-2 grid grid-cols-4 gap-2">
+        <div class="stat-mini">
+          <div id="stat-queries" class="stat-val">0</div>
+          <div class="stat-label">Queries</div>
+        </div>
+        <div class="stat-mini">
+          <div id="stat-audits" class="stat-val">0</div>
+          <div class="stat-label">Audits</div>
+        </div>
+        <div class="stat-mini">
+          <div id="stat-spent" class="stat-val text-amber-400">$0.00</div>
+          <div class="stat-label">Spent</div>
+        </div>
+        <div class="stat-mini">
+          <div id="stat-saved" class="stat-val text-emerald-400">—</div>
+          <div class="stat-label">Revenue Gap</div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- MODALS -->
+  <div id="modal-overlay" class="modal-overlay hidden" onclick="closeModal(event)">
+    <div id="modal-auth" class="modal-box hidden">
+      <div id="modal-auth-content"></div>
+    </div>
+    <div id="modal-wallet" class="modal-box hidden">
+      <div id="modal-wallet-content"></div>
+    </div>
+    <div id="modal-report" class="modal-box wide hidden">
+      <div id="modal-report-content"></div>
+    </div>
+  </div>
+
+  <!-- SCRIPTS — order matters -->
+  <script src="js/db.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/agents.js"></script>
+  <script src="js/logger.js"></script>
+  <script src="js/wallet.js"></script>
+  <script src="js/chat.js"></script>
+  <script src="js/chat-handlers.js"></script>
+  <script src="js/solutions.js"></script>
+  <script src="js/reports.js"></script>
+  <script src="js/actions.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
