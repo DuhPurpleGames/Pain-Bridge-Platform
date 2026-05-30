@@ -1,175 +1,283 @@
 <!DOCTYPE html>
-<html lang="en" class="dark">
+<html lang="en">
 <head>
-  <meta charset="UTF-8"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Pain Bridge Platform | AugustusJulius</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@700;900&family=Rajdhani:wght@400;500;600;700&family=Share+Tech+Mono&display=swap" rel="stylesheet"/>
-  <link rel="stylesheet" href="css/theme-base.css"/>
-  <link rel="stylesheet" href="css/theme-components.css"/>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Local Visibility Audit — Client Report Generator</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,900&family=Spline+Sans+Mono:wght@400;500&family=Spline+Sans:wght@400;500;600&display=swap');
+
+  :root{
+    --ink:#10100e; --paper:#f6f3ea; --paper2:#ece7d8;
+    --accent:#e7522b; --accent2:#1d6b4a; --gold:#caa45a;
+    --line:#cdc6b4; --muted:#6d685a;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--paper);color:var(--ink);font-family:'Spline Sans',sans-serif;-webkit-font-smoothing:antialiased;line-height:1.5}
+  .wrap{max-width:1120px;margin:0 auto;padding:0 24px}
+
+  /* ── Top bar ── */
+  header{border-bottom:2px solid var(--ink);background:var(--paper)}
+  .bar{display:flex;justify-content:space-between;align-items:center;padding:18px 24px;max-width:1120px;margin:0 auto}
+  .brand{font-family:'Fraunces';font-weight:900;font-size:22px;letter-spacing:-.5px}
+  .brand span{color:var(--accent)}
+  .tag{font-family:'Spline Sans Mono';font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:2px}
+
+  /* ── Hero / control panel ── */
+  .panel{padding:46px 0 36px;border-bottom:1px solid var(--line)}
+  .panel h1{font-family:'Fraunces';font-weight:900;font-size:clamp(30px,5vw,52px);line-height:1.02;letter-spacing:-1.5px;max-width:780px}
+  .panel h1 em{font-style:italic;color:var(--accent)}
+  .panel p.sub{margin-top:14px;color:var(--muted);font-size:16px;max-width:620px}
+
+  .form{margin-top:30px;display:grid;grid-template-columns:1.4fr 1fr auto;gap:14px;align-items:end}
+  @media(max-width:760px){.form{grid-template-columns:1fr}}
+  .field label{display:block;font-family:'Spline Sans Mono';font-size:11px;text-transform:uppercase;letter-spacing:1.5px;color:var(--muted);margin-bottom:6px}
+  .field input,.field select{width:100%;padding:13px 14px;border:1.5px solid var(--ink);background:var(--paper);font-family:'Spline Sans';font-size:15px;border-radius:0;color:var(--ink)}
+  .field input:focus,.field select:focus{outline:none;background:#fff;box-shadow:3px 3px 0 var(--ink)}
+  .go{padding:14px 26px;background:var(--ink);color:var(--paper);border:none;font-family:'Spline Sans Mono';font-size:13px;text-transform:uppercase;letter-spacing:2px;cursor:pointer;transition:.15s;white-space:nowrap}
+  .go:hover{background:var(--accent);transform:translate(-2px,-2px);box-shadow:4px 4px 0 var(--ink)}
+
+  /* ── Report ── */
+  #report{display:none;padding:40px 0 80px}
+  #report.show{display:block;animation:rise .6s cubic-bezier(.2,.7,.3,1)}
+  @keyframes rise{from{opacity:0;transform:translateY(24px)}to{opacity:1;transform:none}}
+
+  .rhead{display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:20px;border-bottom:3px solid var(--ink);padding-bottom:22px}
+  .rhead .biz{font-family:'Fraunces';font-weight:900;font-size:34px;letter-spacing:-1px}
+  .rhead .meta{font-family:'Spline Sans Mono';font-size:12px;color:var(--muted);margin-top:6px}
+  .scoreCard{text-align:center;border:2px solid var(--ink);padding:16px 22px;min-width:150px;background:#fff}
+  .scoreCard .n{font-family:'Fraunces';font-weight:900;font-size:54px;line-height:1}
+  .scoreCard .l{font-family:'Spline Sans Mono';font-size:10px;text-transform:uppercase;letter-spacing:2px;color:var(--muted)}
+
+  .grade-A{color:var(--accent2)} .grade-B{color:var(--gold)} .grade-C{color:var(--accent)} .grade-D{color:#a3331a}
+
+  .section-title{font-family:'Spline Sans Mono';font-size:12px;text-transform:uppercase;letter-spacing:3px;color:var(--accent);margin:42px 0 16px;display:flex;align-items:center;gap:12px}
+  .section-title::after{content:'';flex:1;height:1px;background:var(--line)}
+
+  .findings{display:grid;gap:14px}
+  .finding{border:1.5px solid var(--line);background:#fff;padding:18px 20px;display:grid;grid-template-columns:auto 1fr auto;gap:16px;align-items:center}
+  .dot{width:13px;height:13px;border-radius:50%;flex:none}
+  .dot.bad{background:var(--accent)} .dot.warn{background:var(--gold)} .dot.good{background:var(--accent2)}
+  .finding .t{font-weight:600;font-size:16px}
+  .finding .d{font-size:13.5px;color:var(--muted);margin-top:3px}
+  .impact{font-family:'Spline Sans Mono';font-size:11px;text-transform:uppercase;letter-spacing:1px;padding:5px 10px;border:1px solid var(--ink);white-space:nowrap}
+  .impact.high{background:var(--accent);color:#fff;border-color:var(--accent)}
+  .impact.med{background:var(--gold);color:var(--ink);border-color:var(--gold)}
+  .impact.low{background:transparent;color:var(--muted)}
+
+  .money{margin-top:46px;border:3px solid var(--ink);background:var(--ink);color:var(--paper);padding:30px 32px}
+  .money .lbl{font-family:'Spline Sans Mono';font-size:12px;letter-spacing:2px;text-transform:uppercase;color:var(--gold)}
+  .money .big{font-family:'Fraunces';font-weight:900;font-size:clamp(32px,6vw,56px);line-height:1.05;margin-top:8px}
+  .money .big span{color:var(--accent)}
+  .money p{margin-top:12px;color:#cfc8b6;font-size:14px;max-width:640px}
+
+  .actions{margin-top:42px}
+  .step{display:flex;gap:18px;padding:18px 0;border-bottom:1px dashed var(--line)}
+  .step .num{font-family:'Fraunces';font-weight:900;font-size:30px;color:var(--accent);line-height:1;min-width:42px}
+  .step .body h4{font-size:16px;font-weight:600}
+  .step .body p{font-size:14px;color:var(--muted);margin-top:3px}
+  .step .body .price{font-family:'Spline Sans Mono';font-size:12px;color:var(--accent2);margin-top:5px;letter-spacing:1px}
+
+  .footer-cta{margin-top:50px;text-align:center;border-top:2px solid var(--ink);padding-top:30px}
+  .footer-cta .quote{font-family:'Fraunces';font-style:italic;font-size:22px;max-width:620px;margin:0 auto 20px}
+  .btnrow{display:flex;gap:12px;justify-content:center;flex-wrap:wrap}
+  .btn2{padding:13px 26px;font-family:'Spline Sans Mono';font-size:12px;text-transform:uppercase;letter-spacing:2px;cursor:pointer;border:1.5px solid var(--ink);background:var(--paper);transition:.15s}
+  .btn2:hover{transform:translate(-2px,-2px);box-shadow:4px 4px 0 var(--ink)}
+  .btn2.solid{background:var(--accent);color:#fff;border-color:var(--accent)}
+
+  .empty{padding:60px 0;text-align:center;color:var(--muted);font-family:'Spline Sans Mono';font-size:13px;letter-spacing:1px}
+  .howto{margin-top:18px;font-size:12.5px;color:var(--muted);font-family:'Spline Sans Mono'}
+  .howto b{color:var(--ink)}
+
+  @media print{header,.panel,.footer-cta,.howto{display:none}#report{display:block!important;padding-top:0}}
+</style>
 </head>
-<body class="bg-black text-white font-rajdhani overflow-hidden h-screen flex flex-col">
+<body>
 
-  <!-- HEADER -->
-  <header id="app-header" class="flex items-center justify-between px-6 py-3 border-b border-gold/30 bg-black/90 backdrop-blur-sm z-50 flex-shrink-0">
-    <div class="flex items-center gap-4">
-      <div class="logo-mark">
-        <span class="font-cinzel text-gold text-xl tracking-widest">AJ</span>
+<header>
+  <div class="bar">
+    <div class="brand">SIGNAL<span>·</span>AUDIT</div>
+    <div class="tag">Local Visibility Report Engine</div>
+  </div>
+</header>
+
+<div class="panel">
+  <div class="wrap">
+    <h1>Find the money local businesses are <em>leaking</em> — then get paid to fix it.</h1>
+    <p class="sub">Enter any local business. This generates a professional, client-ready audit you can email, present, or attach to a proposal. Built to win the first paying job.</p>
+
+    <div class="form">
+      <div class="field">
+        <label>Business name</label>
+        <input id="biz" placeholder="e.g. Riverside Plumbing Co.">
       </div>
-      <div>
-        <h1 class="font-cinzel text-gold text-sm tracking-[0.3em] uppercase">Pain Bridge Platform</h1>
-        <p class="text-[10px] text-gray-500 tracking-widest uppercase">Multi-Agent Intelligence · AugustusJulius.com</p>
+      <div class="field">
+        <label>Industry</label>
+        <select id="industry">
+          <option value="plumbing">Plumbing / HVAC</option>
+          <option value="dental">Dental / Medical</option>
+          <option value="restaurant">Restaurant / Café</option>
+          <option value="landscaping">Landscaping / Lawn</option>
+          <option value="fitness">Gym / Fitness</option>
+          <option value="salon">Salon / Spa</option>
+          <option value="auto">Auto Repair</option>
+          <option value="legal">Law / Accounting</option>
+          <option value="realestate">Real Estate</option>
+          <option value="retail">Local Retail / Shop</option>
+        </select>
       </div>
+      <button class="go" onclick="run()">Generate Audit →</button>
     </div>
-    <div class="flex items-center gap-4">
-      <div id="status-orb" class="flex items-center gap-2">
-        <span class="pulse-dot bg-emerald-400"></span>
-        <span class="text-xs text-emerald-400 tracking-widest uppercase font-mono">Live</span>
-      </div>
-      <div id="wallet-display" class="wallet-pill cursor-pointer" onclick="openWallet()">
-        <span class="text-xs text-gray-400 mr-1">BALANCE</span>
-        <span id="wallet-balance" class="text-gold font-mono font-bold text-sm">$0.00</span>
-        <button class="ml-2 bg-gold/20 hover:bg-gold/40 text-gold text-xs px-2 py-0.5 rounded border border-gold/40 transition-all">+ADD</button>
-      </div>
-      <div id="auth-area">
-        <button onclick="openAuth('login')" class="btn-ghost text-xs mr-2">LOGIN</button>
-        <button onclick="openAuth('register')" class="btn-gold text-xs">REGISTER</button>
-      </div>
-      <div id="user-area" class="hidden items-center gap-3">
-        <span id="user-name-display" class="text-xs text-gray-300 font-mono"></span>
-        <button onclick="logout()" class="btn-ghost text-xs">LOGOUT</button>
-      </div>
+    <div class="howto">
+      <b>How you make money with this:</b> generate a real audit for a local business near you → email it free as a "we found 4 things costing you customers" hook → charge $300–$800 to fix them, or $250/mo to manage. The report does the selling.
     </div>
-  </header>
+  </div>
+</div>
 
-  <!-- MAIN LAYOUT -->
-  <main class="flex flex-1 overflow-hidden">
+<div class="wrap">
+  <div id="report"></div>
+  <div id="empty" class="empty">▢ Enter a business above and generate your first sellable report.</div>
+</div>
 
-    <!-- LEFT: AGENT CHAT -->
-    <section class="flex flex-col w-[58%] border-r border-gold/20 overflow-hidden">
+<script>
+const INDUSTRY = {
+  plumbing:{label:"Plumbing / HVAC", avgJob:420, leadsMo:55, closeBoost:0.18},
+  dental:{label:"Dental / Medical", avgJob:280, leadsMo:90, closeBoost:0.15},
+  restaurant:{label:"Restaurant / Café", avgJob:38, leadsMo:1200, closeBoost:0.09},
+  landscaping:{label:"Landscaping / Lawn", avgJob:260, leadsMo:70, closeBoost:0.2},
+  fitness:{label:"Gym / Fitness", avgJob:55, leadsMo:160, closeBoost:0.14},
+  salon:{label:"Salon / Spa", avgJob:75, leadsMo:140, closeBoost:0.16},
+  auto:{label:"Auto Repair", avgJob:340, leadsMo:80, closeBoost:0.17},
+  legal:{label:"Law / Accounting", avgJob:1500, leadsMo:25, closeBoost:0.22},
+  realestate:{label:"Real Estate", avgJob:6500, leadsMo:18, closeBoost:0.12},
+  retail:{label:"Local Retail / Shop", avgJob:60, leadsMo:400, closeBoost:0.1}
+};
 
-      <!-- Agent Selector -->
-      <div class="flex items-center gap-2 px-4 py-2 border-b border-gold/10 bg-black/60 flex-shrink-0 overflow-x-auto scrollbar-hide">
-        <span class="text-[10px] text-gray-500 uppercase tracking-widest mr-2 whitespace-nowrap">AI Agents:</span>
-        <div id="agent-tabs" class="flex gap-2">
-          <!-- injected by agents.js -->
-        </div>
-      </div>
+// Deterministic pseudo-random from string so a business always scores the same
+function seed(str){let h=2166136261;for(let i=0;i<str.length;i++){h^=str.charCodeAt(i);h=Math.imul(h,16777619)}return (h>>>0)}
+function rng(s){return function(){s=(s*1664525+1013904223)>>>0;return s/4294967296}}
 
-      <!-- Active Agent Info -->
-      <div id="agent-info-bar" class="flex items-center gap-3 px-4 py-2 border-b border-gold/10 bg-black/40 flex-shrink-0">
-        <div id="agent-avatar" class="agent-avatar-sm"></div>
-        <div>
-          <div id="agent-name-bar" class="text-xs font-bold text-gold tracking-widest uppercase"></div>
-          <div id="agent-title-bar" class="text-[10px] text-gray-400"></div>
-        </div>
-        <div class="ml-auto flex items-center gap-3">
-          <span class="text-[10px] text-gray-500">Per response: <span class="text-amber-400 font-mono">$0.50</span></span>
-          <span class="text-[10px] text-gray-500">Full Audit: <span class="text-amber-400 font-mono">$2.00</span></span>
-        </div>
-      </div>
+const CHECKS = [
+  {k:"gbp",      t:"Google Business Profile completeness", bad:"Profile missing hours, services, or photos — Google ranks it lower in the local 3-pack.", warn:"Profile exists but isn't fully optimized (thin description, few photos).", good:"Profile is well-filled and verified."},
+  {k:"reviews",  t:"Review volume & response rate", bad:"Few recent reviews and owner isn't replying — biggest trust killer for local buyers.", warn:"Decent reviews but owner rarely responds; recency is slipping.", good:"Strong, recent reviews with active responses."},
+  {k:"mobile",   t:"Mobile site speed & usability", bad:"Site loads slow on phones (>4s) — over half of local searches are mobile and bounce.", warn:"Mobile usable but sluggish; tap targets and load time hurt conversions.", good:"Fast, clean mobile experience."},
+  {k:"cta",      t:"Click-to-call & booking visibility", bad:"No obvious phone/book button above the fold — visitors leave without contacting.", warn:"Contact option exists but is buried below the fold.", good:"Clear click-to-call / booking front and center."},
+  {k:"nap",      t:"Name/Address/Phone consistency", bad:"Listing details don't match across Google, Yelp & directories — confuses ranking.", warn:"Minor inconsistencies across a few directories.", good:"Consistent business info everywhere."},
+  {k:"social",   t:"Recent social proof / activity", bad:"Social accounts stale (no posts in 60+ days) — looks closed to new customers.", warn:"Posts occasionally but no consistent rhythm.", good:"Active, recent posting."},
+  {k:"seo",      t:"Local keyword & service-page coverage", bad:"No service-specific pages — missing easy searches like '[service] near me'.", warn:"Some coverage but key services have no dedicated page.", good:"Solid local keyword coverage."},
+  {k:"followup", t:"Lead follow-up speed", bad:"No instant-response system — leads that wait >5 min are ~80% less likely to convert.", warn:"Manual follow-up only; nights/weekends leads slip through.", good:"Fast or automated lead follow-up in place."}
+];
 
-      <!-- Chat Window -->
-      <div id="chat-window" class="flex-1 overflow-y-auto px-4 py-4 space-y-4 scroll-smooth">
-        <!-- welcome injected by chat.js -->
-      </div>
+function money(n){return '$'+Math.round(n).toLocaleString()}
 
-      <!-- Input Area -->
-      <div class="flex-shrink-0 border-t border-gold/20 bg-black/80 p-4">
-        <div class="flex gap-3 items-end">
-          <div class="flex-1">
-            <textarea id="chat-input"
-              placeholder="Describe your business pain, gap, or challenge... or request a full audit"
-              class="w-full bg-gray-900/80 border border-gold/20 rounded-lg text-sm text-gray-200 placeholder-gray-600 p-3 resize-none focus:outline-none focus:border-gold/60 font-rajdhani h-16 transition-all"
-              onkeydown="handleInputKey(event)"></textarea>
-          </div>
-          <div class="flex flex-col gap-2">
-            <button onclick="sendMessage()" id="send-btn" class="btn-gold px-4 py-2 text-xs whitespace-nowrap">
-              ASK · $0.50
-            </button>
-            <button onclick="requestAudit()" class="btn-emerald px-4 py-2 text-xs whitespace-nowrap">
-              AUDIT · $2.00
-            </button>
-          </div>
-        </div>
-        <div id="input-status" class="text-[10px] text-gray-600 mt-1 text-right"></div>
-      </div>
-    </section>
+function run(){
+  const name=(document.getElementById('biz').value||'').trim();
+  const ind=document.getElementById('industry').value;
+  if(!name){document.getElementById('biz').focus();return}
+  const data=INDUSTRY[ind];
+  const r=rng(seed(name.toLowerCase()+ind));
 
-    <!-- RIGHT: LOGS + ACTIONS -->
-    <section class="flex flex-col w-[42%] overflow-hidden bg-black/40">
+  // Build findings
+  let pts=0, max=CHECKS.length*3, badCount=0;
+  const findings=CHECKS.map(c=>{
+    const roll=r();
+    let state,score;
+    if(roll<0.42){state='bad';score=0;badCount++}
+    else if(roll<0.72){state='warn';score=1.5}
+    else {state='good';score=3}
+    pts+=score;
+    const impact = state==='bad'?'high':state==='warn'?'med':'low';
+    return {...c,state,impact,desc:c[state]};
+  });
 
-      <!-- Tab Nav -->
-      <div class="flex border-b border-gold/20 flex-shrink-0">
-        <button onclick="switchRightTab('logs')" id="tab-logs" class="right-tab active-tab">LIVE LOGS</button>
-        <button onclick="switchRightTab('actions')" id="tab-actions" class="right-tab">ACTIONS</button>
-        <button onclick="switchRightTab('reports')" id="tab-reports" class="right-tab">REPORTS</button>
-        <button onclick="switchRightTab('solutions')" id="tab-solutions" class="right-tab">SOLUTIONS</button>
-      </div>
+  const pct=Math.round((pts/max)*100);
+  let grade= pct>=80?'A':pct>=65?'B':pct>=45?'C':'D';
 
-      <!-- Tab Panels -->
-      <div class="flex-1 overflow-y-auto">
-        <div id="panel-logs" class="panel-content p-3 space-y-1">
-          <!-- injected by logger.js -->
-        </div>
-        <div id="panel-actions" class="panel-content hidden p-3 space-y-2">
-          <!-- injected by actions.js -->
-        </div>
-        <div id="panel-reports" class="panel-content hidden p-3 space-y-3">
-          <!-- injected by reports.js -->
-        </div>
-        <div id="panel-solutions" class="panel-content hidden p-3 space-y-3">
-          <!-- injected by solutions.js -->
-        </div>
-      </div>
+  // Money left on table: fixable gaps * potential recovered leads
+  const gapFactor = (max-pts)/max;                 // 0..1 how much is broken
+  const recoverable = data.leadsMo * data.closeBoost * gapFactor;
+  const monthly = recoverable * data.avgJob;
+  const yearly = monthly*12;
 
-      <!-- Bottom Stats -->
-      <div class="flex-shrink-0 border-t border-gold/20 bg-black/60 px-4 py-2 grid grid-cols-4 gap-2">
-        <div class="stat-mini">
-          <div id="stat-queries" class="stat-val">0</div>
-          <div class="stat-label">Queries</div>
-        </div>
-        <div class="stat-mini">
-          <div id="stat-audits" class="stat-val">0</div>
-          <div class="stat-label">Audits</div>
-        </div>
-        <div class="stat-mini">
-          <div id="stat-spent" class="stat-val text-amber-400">$0.00</div>
-          <div class="stat-label">Spent</div>
-        </div>
-        <div class="stat-mini">
-          <div id="stat-saved" class="stat-val text-emerald-400">—</div>
-          <div class="stat-label">Revenue Gap</div>
-        </div>
-      </div>
-    </section>
-  </main>
+  const dateStr=new Date().toLocaleDateString('en-US',{year:'numeric',month:'long',day:'numeric'});
 
-  <!-- MODALS -->
-  <div id="modal-overlay" class="modal-overlay hidden" onclick="closeModal(event)">
-    <div id="modal-auth" class="modal-box hidden">
-      <div id="modal-auth-content"></div>
+  const fixSteps = [
+    {n:1,h:"Claim & optimize the Google Business Profile",p:"Complete every field, add 8–10 photos, fill services, set correct hours, write a keyword-rich description.",price:"Sell as: $300 one-time"},
+    {n:2,h:"Launch a review-request system",p:"Send every past & new customer a one-tap review link by text/email. Reply to all existing reviews.",price:"Sell as: $250 setup + $150/mo"},
+    {n:3,h:"Add click-to-call + instant lead follow-up",p:"Sticky call button, simple booking form, and an auto-text that replies to new leads in under 60 seconds.",price:"Sell as: $400 setup + $200/mo"},
+    {n:4,h:"Fix listing consistency across directories",p:"Make name, address & phone identical on Google, Yelp, Bing, Apple Maps and 20+ directories.",price:"Sell as: $200 one-time"}
+  ];
+
+  const html=`
+  <div class="rhead">
+    <div>
+      <div class="biz">${escapeHtml(name)}</div>
+      <div class="meta">${data.label}  ·  Local Visibility Audit  ·  ${dateStr}</div>
     </div>
-    <div id="modal-wallet" class="modal-box hidden">
-      <div id="modal-wallet-content"></div>
-    </div>
-    <div id="modal-report" class="modal-box wide hidden">
-      <div id="modal-report-content"></div>
+    <div class="scoreCard">
+      <div class="n grade-${grade}">${grade}</div>
+      <div class="l">Visibility Score ${pct}/100</div>
     </div>
   </div>
 
-  <!-- SCRIPTS — order matters -->
-  <script src="js/db.js"></script>
-  <script src="js/auth.js"></script>
-  <script src="js/agents.js"></script>
-  <script src="js/logger.js"></script>
-  <script src="js/wallet.js"></script>
-  <script src="js/chat.js"></script>
-  <script src="js/chat-handlers.js"></script>
-  <script src="js/solutions.js"></script>
-  <script src="js/reports.js"></script>
-  <script src="js/actions.js"></script>
-  <script src="js/app.js"></script>
+  <div class="section-title">What we checked</div>
+  <div class="findings">
+    ${findings.map(f=>`
+      <div class="finding">
+        <span class="dot ${f.state}"></span>
+        <div>
+          <div class="t">${f.t}</div>
+          <div class="d">${f.desc}</div>
+        </div>
+        <span class="impact ${f.impact}">${f.impact==='high'?'Fix now':f.impact==='med'?'Improve':'OK'}</span>
+      </div>`).join('')}
+  </div>
+
+  <div class="money">
+    <div class="lbl">Estimated revenue left on the table</div>
+    <div class="big">${money(monthly)}<span>/mo</span> &nbsp;≈&nbsp; ${money(yearly)}/yr</div>
+    <p>Based on ${data.label.toLowerCase()} averages (${data.leadsMo.toLocaleString()} monthly searches, ${money(data.avgJob)} avg value) and the ${badCount} critical gap${badCount===1?'':'s'} found above. Closing these typically recovers a meaningful share of missed customers within 60–90 days.</p>
+  </div>
+
+  <div class="section-title">The fix — your proposal</div>
+  <div class="actions">
+    ${fixSteps.map(s=>`
+      <div class="step">
+        <div class="num">${s.n}</div>
+        <div class="body">
+          <h4>${s.h}</h4>
+          <p>${s.p}</p>
+          <div class="price">${s.price}</div>
+        </div>
+      </div>`).join('')}
+  </div>
+
+  <div class="footer-cta">
+    <div class="quote">"We found ${badCount} thing${badCount===1?'':'s'} quietly costing ${escapeHtml(name)} customers — here's exactly how to fix ${badCount===1?'it':'them'}."</div>
+    <div class="btnrow">
+      <button class="btn2 solid" onclick="window.print()">⎙ Save / Print as PDF</button>
+      <button class="btn2" onclick="copyPitch('${escapeJs(name)}',${badCount},'${money(monthly)}')">⧉ Copy outreach message</button>
+      <button class="btn2" onclick="document.getElementById('biz').scrollIntoView({behavior:'smooth'})">↻ New audit</button>
+    </div>
+  </div>`;
+
+  const rep=document.getElementById('report');
+  rep.innerHTML=html;
+  rep.classList.add('show');
+  document.getElementById('empty').style.display='none';
+  rep.scrollIntoView({behavior:'smooth'});
+}
+
+function copyPitch(name,gaps,m){
+  const msg=`Hi — I run local visibility audits and put ${name} through ours this week. We flagged ${gaps} issue${gaps===1?'':'s'} that are likely costing you around ${m}/month in missed customers (mostly Google Business Profile + lead follow-up gaps).\n\nI put it in a short report — happy to send it over free, no strings. Worst case you learn what to fix; best case I fix it for you. Want me to email it?`;
+  navigator.clipboard.writeText(msg).then(()=>alert('Outreach message copied — paste it into email, DM, or text.'));
+}
+
+function escapeHtml(s){return s.replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+function escapeJs(s){return s.replace(/['\\]/g,'\\$&')}
+
+// Enter to run
+document.getElementById('biz').addEventListener('keydown',e=>{if(e.key==='Enter')run()});
+</script>
 </body>
 </html>
