@@ -504,7 +504,9 @@
     <button class="modal-btn btn-new" onclick="newSession()">🎵 Start New Session</button>
   </div>
 </div>
-
+<script>
+window.__ANTHROPIC_KEY = "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";
+</script>
 <script>
 // ─── STATE ────────────────────────────────────────────────
 const UNLOCK_CODE = "WRROOM2024"; // change this to match what you text people
@@ -764,7 +766,7 @@ input.addEventListener("keydown", e => { if (e.key === "Enter") send(); });
 sendBtn.addEventListener("click", send);
 // ─── API KEY INJECTION ────────────────────────────────────
 // To deploy: add this line to your page or server config:
-// window.__ANTHROPIC_KEY = "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";
+// window.__ANTHROPIC_KEY = "";
 // Or set it here directly (not recommended for public sites):
 // window.__ANTHROPIC_KEY = "YOUR_KEY";
 </script>
