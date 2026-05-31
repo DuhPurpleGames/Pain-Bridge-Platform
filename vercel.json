@@ -1,12 +1,22 @@
 {
   "version": 2,
-  "builds": [
-    {
-      "src": "index.html",
-      "use": "@vercel/static"
+  "functions": {
+    "api/rhyme.js": {
+      "runtime": "edge"
+    },
+    "api/notes.js": {
+      "runtime": "edge"
     }
-  ],
+  },
   "routes": [
+    {
+      "src": "/api/rhyme",
+      "dest": "/api/rhyme.js"
+    },
+    {
+      "src": "/api/notes",
+      "dest": "/api/notes.js"
+    },
     {
       "src": "/(.*)",
       "dest": "/index.html"
