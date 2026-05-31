@@ -17,13 +17,12 @@
     display: flex;
     flex-direction: column;
     align-items: center;
-    padding: 0 16px 100px;
+    padding: 0 16px 120px;
     background-image:
       radial-gradient(ellipse at 15% 40%, #1a0a4a18 0%, transparent 55%),
       radial-gradient(ellipse at 85% 20%, #0a1a3a22 0%, transparent 50%);
   }
 
-  /* HEADER */
   header {
     width: 100%;
     max-width: 460px;
@@ -61,7 +60,6 @@
     margin-top: 14px;
   }
 
-  /* CHAT AREA */
   #chat {
     width: 100%;
     max-width: 460px;
@@ -72,7 +70,6 @@
     gap: 14px;
   }
 
-  /* BUBBLES */
   .bubble-user {
     display: flex;
     justify-content: flex-end;
@@ -114,7 +111,7 @@
     box-shadow: 0 2px 24px #a78bfa0d;
   }
 
-  .bubble-ai .content .rhyme-word {
+  .rhyme-word {
     display: inline-block;
     background: #a78bfa18;
     border: 1px solid #a78bfa44;
@@ -125,7 +122,11 @@
     font-size: 14px;
     font-weight: 500;
     letter-spacing: 0.3px;
+    cursor: pointer;
+    transition: background 0.15s;
   }
+
+  .rhyme-word:hover { background: #a78bfa33; }
 
   .bubble-system {
     text-align: center;
@@ -141,7 +142,6 @@
     display: inline-block;
   }
 
-  /* TYPING */
   .typing-dots span {
     display: inline-block;
     width: 6px; height: 6px;
@@ -153,7 +153,6 @@
   .typing-dots span:nth-child(2) { animation-delay: 0.2s; }
   .typing-dots span:nth-child(3) { animation-delay: 0.4s; }
 
-  /* INPUT BAR */
   #input-bar {
     position: fixed;
     bottom: 0;
@@ -161,7 +160,7 @@
     transform: translateX(-50%);
     width: 100%;
     max-width: 460px;
-    padding: 12px 16px 24px;
+    padding: 12px 16px 28px;
     background: linear-gradient(0deg, #07070f 65%, transparent);
     backdrop-filter: blur(10px);
   }
@@ -208,10 +207,10 @@
     opacity: 0.5;
   }
 
-  /* END SESSION */
   #end-btn-wrap {
     text-align: center;
     margin-top: 10px;
+    display: none;
   }
 
   #end-btn {
@@ -241,7 +240,7 @@
     justify-content: center;
   }
 
-  #modal-overlay.open { display: flex; }
+  #modal-overlay.open { display: flex; animation: fadeIn 0.2s ease; }
 
   #modal {
     width: 100%;
@@ -258,6 +257,11 @@
   @keyframes slideUp {
     from { transform: translateY(40px); opacity: 0; }
     to { transform: translateY(0); opacity: 1; }
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
   }
 
   .modal-title {
@@ -289,11 +293,12 @@
     justify-content: center;
     gap: 8px;
     margin-bottom: 12px;
+    border: none;
   }
 
   .btn-free {
     background: #ffffff09;
-    border: 1px solid #ffffff1a;
+    border: 1px solid #ffffff1a !important;
     color: #888;
   }
 
@@ -325,8 +330,7 @@
   .highlight-header .hl-text p { color: #555; font-size: 12px; }
   .highlight-header .price { margin-left: auto; color: #6ee7b7; font-size: 20px; font-weight: 700; }
 
-  /* unlock form */
-  #unlock-section { margin-top: 10px; }
+  #unlock-section { margin-top: 4px; }
 
   .unlock-info {
     background: #ffffff08;
@@ -335,7 +339,7 @@
     padding: 12px 14px;
     font-size: 13px;
     color: #777;
-    line-height: 1.7;
+    line-height: 1.8;
     margin-bottom: 12px;
     text-align: center;
   }
@@ -354,6 +358,7 @@
     text-align: center;
     letter-spacing: 3px;
     margin-bottom: 10px;
+    display: block;
   }
 
   #code-input:focus { outline: none; border-color: #7c3aed88; }
@@ -361,24 +366,22 @@
 
   .btn-unlock {
     background: linear-gradient(135deg, #10b981, #059669);
-    border: none;
     color: #fff;
     font-weight: 500;
     box-shadow: 0 4px 20px #10b98133;
+    border: none !important;
   }
 
-  .btn-unlock:hover { box-shadow: 0 4px 28px #10b98155; }
+  .btn-unlock:hover { box-shadow: 0 4px 28px #10b98155; transform: translateY(-1px); }
 
   #unlock-error {
     text-align: center;
     color: #f87171;
     font-size: 12px;
-    margin-top: -6px;
     margin-bottom: 8px;
     display: none;
   }
 
-  /* highlights content */
   #highlights-content { display: none; }
 
   .hl-section { margin-bottom: 14px; }
@@ -403,12 +406,23 @@
   }
 
   .btn-new {
-    background: transparent;
-    border: 1px solid #2d2d5a;
-    color: #555;
+    background: transparent !important;
+    border: 1px solid #2d2d5a !important;
+    color: #555 !important;
+    box-shadow: none !important;
   }
 
-  /* ANIMATIONS */
+  .spinner {
+    display: inline-block;
+    width: 14px; height: 14px;
+    border: 2px solid #a78bfa44;
+    border-top-color: #a78bfa;
+    border-radius: 50%;
+    animation: spin 0.7s linear infinite;
+    margin-right: 6px;
+    vertical-align: middle;
+  }
+
   @keyframes shimmer {
     0% { background-position: 0% center; }
     100% { background-position: 200% center; }
@@ -422,6 +436,10 @@
   @keyframes fadeUp {
     from { opacity: 0; transform: translateY(8px); }
     to { opacity: 1; transform: translateY(0); }
+  }
+
+  @keyframes spin {
+    to { transform: rotate(360deg); }
   }
 
   .fade-in { animation: fadeUp 0.35s ease; }
@@ -446,7 +464,266 @@
     <input id="word-input" type="text" placeholder="Enter a word to rhyme..." autocomplete="off" autocorrect="off" spellcheck="false" />
     <button id="send-btn">↑</button>
   </div>
-  <div id="end-btn-wrap" style="display:none;">
+  <div id="end-btn-wrap">
+    <button id="end-btn">End Session &amp; Get Highlights →</button>
+  </div>
+</div>
+
+<!-- MODAL -->
+<div id="modal-overlay">
+  <div id="modal">
+    <div class="modal-title">
+      <span class="icon">🎵</span>
+      <h2>Session Complete</h2>
+      <p id="modal-count">0 rhyme lookups</p>
+    </div>
+
+    <button class="modal-btn btn-free" id="free-dl-btn">📄 Download Transcript — Free</button>
+
+    <div class="highlight-box">
+      <div class="highlight-header">
+        <span class="hl-icon">✨</span>
+        <div class="hl-text">
+          <h3>Session Highlights</h3>
+          <p>Top rhymes • patterns • writing notes</p>
+        </div>
+        <span class="price">$2</span>
+      </div>
+
+      <div id="unlock-section">
+        <div class="unlock-info">
+          Text <strong>(602) 690-0836</strong> and we'll send you a<br/>
+          <strong>Cash App $name</strong> + your unlock code after $2 payment.
+        </div>
+        <input id="code-input" type="text" placeholder="Enter unlock code" maxlength="16" />
+        <div id="unlock-error">❌ Invalid code — try again or text (602) 690-0836</div>
+        <button class="modal-btn btn-unlock" id="unlock-btn">✅ Unlock &amp; Download Highlights</button>
+      </div>
+
+      <div id="highlights-content">
+        <div class="hl-section">
+          <div class="hl-section-label">🔤 Words You Searched</div>
+          <div id="hl-words"></div>
+        </div>
+        <div class="hl-section">
+          <div class="hl-section-label">🎯 Top Rhyme Picks</div>
+          <div id="hl-top"></div>
+        </div>
+        <div class="hl-section">
+          <div class="hl-section-label">💡 Writing Notes</div>
+          <div id="hl-notes"><div class="hl-item"><span class="spinner"></span> Generating tips...</div></div>
+        </div>
+        <button class="modal-btn btn-unlock" id="full-dl-btn" style="margin-top:8px;">⬇️ Download Full Report</button>
+      </div>
+    </div>
+
+    <button class="modal-btn btn-new" id="new-session-btn">🎵 Start New Session</button>
+  </div>
+</div>
+
+<script>
+  // ── CONFIG ─────────────────────────────────────────────
+  const API_KEY    = "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";
+  const UNLOCK_CODE = "WRROOM2024"; // text this to people after they pay
+
+  // ── STATE ──────────────────────────────────────────────
+  let sessionLog = []; // [{ word, rhymes[] }]
+  let isLoading  = false;
+
+  // ── ELEMENTS ───────────────────────────────────────────
+  const chatEl      = document.getElementById("chat");
+  const wordInput   = document.getElementById("word-input");
+  const sendBtn     = document.getElementById("send-btn");
+  const endBtnWrap  = document.getElementById("end-btn-wrap");
+  const modalEl     = document.getElementById("modal-overlay");
+
+  // ── SEND ───────────────────────────────────────────────
+  async function send() {
+    const word = wordInput.value.trim();
+    if (!word || isLoading) return;
+    wordInput.value = "";
+    isLoading = true;
+    sendBtn.disabled = true;
+
+    addBubbleUser(word);
+    const typingId = addBubbleTyping();
+
+    try {
+      const rhymes = await fetchRhymes(word);
+      removeBubble(typingId);
+      addBubbleRhymes(word, rhymes);
+      sessionLog.push({ word, rhymes });
+      endBtnWrap.style.display = "block";
+    } catch (err) {
+      removeBubble(typingId);
+      addBubbleSystem("⚠️ " + (err.message || "Something went wrong. Try again."));
+    }
+
+    isLoading = false;
+    sendBtn.disabled = false;
+    wordInput.focus();
+  }
+
+  // ── API ────────────────────────────────────────────────
+  async function fetchRhymes(word) {
+    const res = await fetch("https://api.anthropic.com/v1/messages", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "x-api-key": API_KEY,
+        "anthropic-version": "2023-06-01",
+        "anthropic-dangerous-direct-browser-access": "true"
+      },
+      body: JSON.stringify({
+        model: "claude-haiku-4-5-20251001",
+        max_tokens: 600,
+        messages: [{
+          role: "user",
+          content: `Give me a complete rhyming word list for the word "${word}". Return ONLY a plain comma-separated list — no intro, no explanation, no numbering. Include perfect rhymes, near rhymes, slant rhymes, and short rhyming phrases. Aim for 25–40 options.`
+        }]
+      })
+    });
+
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      throw new Error(err?.error?.message || `API error ${res.status}`);
+    }
+
+    const data = await res.json();
+    const text = data.content?.[0]?.text || "";
+    return text.split(",").map(w => w.trim().replace(/[.\n]/g, "")).filter(Boolean);
+  }
+
+  async function fetchWritingNotes(words) {
+    const res = await fetch("https://api.anthropic.com/v1/messages", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "x-api-key": API_KEY,
+        "anthropic-version": "2023-06-01",
+        "anthropic-dangerous-direct-browser-access": "true"
+      },
+      body: JSON.stringify({
+        model: "claude-haiku-4-5-20251001",
+        max_tokens: 300,
+        messages: [{
+          role: "user",
+          content: `A songwriter looked up rhymes for: ${words.join(", ")}. Give 3 short practical songwriting tips based on these word themes. Use • bullets, plain text only, no intro.`
+        }]
+      })
+    });
+
+    const data = await res.json();
+    return data.content?.[0]?.text || "";
+  }
+
+  // ── DOM HELPERS ────────────────────────────────────────
+  function addBubbleUser(word) {
+    const el = document.createElement("div");
+    el.className = "bubble-user fade-in";
+    el.innerHTML = `<span>🔍 Rhymes for "<strong>${esc(word)}</strong>"</span>`;
+    chatEl.appendChild(el);
+    scrollDown();
+  }
+
+  function addBubbleTyping() {
+    const id = "t" + Date.now();
+    const el = document.createElement("div");
+    el.className = "bubble-ai fade-in";
+    el.id = id;
+    el.innerHTML = `<div class="label">Finding rhymes...</div>
+      <div class="content"><div class="typing-dots"><span></span><span></span><span></span></div></div>`;
+    chatEl.appendChild(el);
+    scrollDown();
+    return id;
+  }
+
+  function addBubbleRhymes(word, rhymes) {
+    const el = document.createElement("div");
+    el.className = "bubble-ai fade-in";
+    const chips = rhymes.map(r => `<span class="rhyme-word" onclick="copyWord('${esc(r)}')" title="Click to copy">${esc(r)}</span>`).join("");
+    el.innerHTML = `<div class="label">Rhymes for "${esc(word)}" — ${rhymes.length} found</div>
+      <div class="content">${chips}</div>`;
+    chatEl.appendChild(el);
+    scrollDown();
+  }
+
+  function addBubbleSystem(msg) {
+    const el = document.createElement("div");
+    el.className = "bubble-system fade-in";
+    el.innerHTML = `<span>${msg}</span>`;
+    chatEl.appendChild(el);
+    scrollDown();
+  }
+
+  function removeBubble(id) { document.getElementById(id)?.remove(); }
+
+  function scrollDown() {
+    setTimeout(() => window.scrollTo({ top: document.body.scrollHeight, behavior: "smooth" }), 60);
+  }
+
+  function esc(s) {
+    return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
+  }
+
+  function copyWord(word) {
+    navigator.clipboard?.writeText(word).then(() => addBubbleSystem(`"${word}" copied!`));
+  }
+
+  // ── EVENT LISTENERS ────────────────────────────────────
+  wordInput.addEventListener("keydown", e => { if (e.key === "Enter") send(); });
+  sendBtn.addEventListener("click", send);
+
+  document.getElementById("end-btn").addEventListener("click", () => {
+    document.getElementById("modal-count").textContent =
+      `${sessionLog.length} rhyme lookup${sessionLog.length !== 1 ? "s" : ""}`;
+    modalEl.classList.add("open");
+  });
+
+  modalEl.addEventListener("click", e => { if (e.target === modalEl) modalEl.classList.remove("open"); });
+
+  // ── FREE DOWNLOAD ──────────────────────────────────────
+  document.getElementById("free-dl-btn").addEventListener("click", downloadFree);
+
+  function downloadFree() {
+    let txt = "WRITER'S ROOM — SESSION TRANSCRIPT\n";
+    txt += `Date: ${new Date().toLocaleString()}\n`;
+    txt += "=".repeat(44) + "\n\n";
+    sessionLog.forEach(e => {
+      txt += `WORD: ${e.word}\n`;
+      txt += `RHYMES: ${e.rhymes.join(", ")}\n\n`;
+    });
+    saveFile(txt, "writers-room-transcript.txt");
+  }
+
+  // ── UNLOCK ─────────────────────────────────────────────
+  document.getElementById("unlock-btn").addEventListener("click", tryUnlock);
+
+  async function tryUnlock() {
+    const code = document.getElementById("code-input").value.trim().toUpperCase();
+    const errEl = document.getElementById("unlock-error");
+    const codeEl = document.getElementById("code-input");
+
+    if (code !== UNLOCK_CODE) {
+      errEl.style.display = "block";
+      codeEl.style.borderColor = "#f8717166";
+      codeEl.focus();
+      return;
+    }
+
+    errEl.style.display = "none";
+    document.getElementById("unlock-section").style.display = "none";
+    document.getElementById("highlights-content").style.display = "block";
+
+    // Populate words + top rhymes (instant)
+    const allWords = sessionLog.map(e => e.word);
+    document.getElementById("hl-words").innerHTML =
+      allWords.map(w => `<div class="hl-item">${esc(w)}</div>`).join("");
+
+    const freq = {};
+    sessionLog.forEach(e => e.rhymes.forEach(r => { freq[r] = (freq[r]||0)+1; }));
+    const top = Object.entries(freq).sort((a,b) => b[1]-a[1]).slice(0,14).map(x => x[0]);
+    document.getEl:none;">
     <button id="end-btn">End Session &amp; Get Highlights →</button>
   </div>
 </div>
