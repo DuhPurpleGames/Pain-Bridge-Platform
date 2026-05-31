@@ -762,3 +762,11 @@ function newSession() {
 // ─── KEY BINDING ──────────────────────────────────────────
 input.addEventListener("keydown", e => { if (e.key === "Enter") send(); });
 sendBtn.addEventListener("click", send);
+// ─── API KEY INJECTION ────────────────────────────────────
+// To deploy: add this line to your page or server config:
+// window.__ANTHROPIC_KEY = "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";
+// Or set it here directly (not recommended for public sites):
+// window.__ANTHROPIC_KEY = "YOUR_KEY";
+</script>
+</body>
+</html>
