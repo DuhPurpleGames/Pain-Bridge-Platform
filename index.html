@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+    <!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
@@ -124,42 +124,45 @@ header p{font-size:12px;color:#444;letter-spacing:3px;text-transform:uppercase;m
 </div>
 <script>
 (function(){
-var K="";
-var C="purppurp";
+var C="WRROOM2024";
 var log=[],busy=false;
 var chat=document.getElementById("chat");
 var wi=document.getElementById("wi");
 var sb=document.getElementById("sb");
 var ebw=document.getElementById("ebw");
 var ov=document.getElementById("ov");
-function api(p,m,cb){
-  fetch("https://api.anthropic.com/v1/messages",{
+
+function callAPI(endpoint,body,cb){
+  fetch(endpoint,{
     method:"POST",
-    headers:{"Content-Type":"application/json","x-api-key":K,"anthropic-version":"2023-06-01","anthropic-dangerous-direct-browser-access":"true"},
-    body:JSON.stringify({model:"claude-opus-4-6",max_tokens:m,messages:[{role:"user",content:p}]})
-  }).then(function(r){return r.json();}).then(function(d){
-    if(d.error){cb(null,d.error.message);return;}
-    cb(d.content&&d.content[0]?d.content[0].text:"",null);
-  }).catch(function(e){cb(null,e.message||"Network error");});
+    headers:{"Content-Type":"application/json"},
+    body:JSON.stringify(body)
+  }).then(function(r){return r.json();})
+  .then(function(d){
+    if(d.error){cb(null,d.error);return;}
+    cb(d.text||"",null);
+  })
+  .catch(function(e){cb(null,e.message||"Network error");});
 }
+
 function send(){
   var w=wi.value.trim();
   if(!w||busy)return;
   wi.value="";busy=true;sb.disabled=true;
   addUser(w);
   var tid=addTyping();
-  api("Rhyming words for the word: "+w+". Respond with ONLY a comma-separated list of words and short phrases. Nothing else. No intro, no explanation, no numbers, no categories. Example: never, clever, forever, together, endeavor, whether. Give 30 to 40 rhymes.",700,function(text,err){
+  callAPI("/api/rhyme",{word:w},function(text,err){
     del(tid);
     if(err||!text){addSys("Error: "+(err||"No response. Try again."));busy=false;sb.disabled=false;return;}
-    var raw=text.replace(/\n/g,",");
-    var words=raw.split(",").map(function(x){var t=x.trim();return t.replace(/^[^a-zA-Z]+/,"").replace(/[^a-zA-Z \-']+$/,"").trim();}).filter(function(x){return x.length>1&&x.length<36;});
-    if(words.length<2){addSys("Retry - response: "+text.substring(0,100));busy=false;sb.disabled=false;return;}
+    var words=text.split(",").map(function(x){return x.replace(/\n/g,"").trim().replace(/^[^a-zA-Z]+/,"").replace(/[^a-zA-Z \-']+$/,"").trim();}).filter(function(x){return x.length>1&&x.length<36;});
+    if(words.length<2){addSys("Got: "+text.substring(0,100));busy=false;sb.disabled=false;return;}
     addRhymes(w,words);
     log.push({word:w,rhymes:words});
     ebw.style.display="block";
     busy=false;sb.disabled=false;wi.focus();
   });
 }
+
 function addUser(w){
   var d=mk("div","bu fi");
   d.innerHTML="<span>Rhymes for <strong>"+esc(w)+"</strong></span>";
@@ -187,9 +190,11 @@ function addSys(msg){var d=mk("div","bs fi");d.innerHTML="<span>"+msg+"</span>";
 function del(id){var e=document.getElementById(id);if(e)e.remove();}
 function sc(){setTimeout(function(){window.scrollTo({top:document.body.scrollHeight,behavior:"smooth"});},60);}
 function mk(tag,cls){var e=document.createElement(tag);e.className=cls;return e;}
-function esc(s){return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;").replace(/'/g,"&#39;");}
+function esc(s){return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");}
+
 wi.addEventListener("keydown",function(e){if(e.key==="Enter")send();});
 sb.addEventListener("click",send);
+
 document.getElementById("eb").addEventListener("click",function(){
   document.getElementById("mc").textContent=log.length+" rhyme lookup"+(log.length!==1?"s":"");
   document.getElementById("us").style.display="block";
@@ -200,11 +205,13 @@ document.getElementById("eb").addEventListener("click",function(){
   ov.classList.add("open");
 });
 ov.addEventListener("click",function(e){if(e.target===ov)ov.classList.remove("open");});
+
 document.getElementById("fd").addEventListener("click",function(){
   var t="WRITERS ROOM - SESSION TRANSCRIPT\nDate: "+new Date().toLocaleString()+"\n\n";
   log.forEach(function(e){t+="WORD: "+e.word+"\nRHYMES: "+e.rhymes.join(", ")+"\n\n";});
   save(t,"writers-room-transcript.txt");
 });
+
 document.getElementById("ub").addEventListener("click",function(){
   var v=document.getElementById("ci").value.trim().toUpperCase();
   if(v!==C){document.getElementById("ue").style.display="block";document.getElementById("ci").style.borderColor="rgba(248,113,113,.4)";return;}
@@ -217,12 +224,13 @@ document.getElementById("ub").addEventListener("click",function(){
   log.forEach(function(e){e.rhymes.forEach(function(r){freq[r]=(freq[r]||0)+1;});});
   var top=Object.keys(freq).sort(function(a,b){return freq[b]-freq[a];}).slice(0,16);
   document.getElementById("ht2").innerHTML=top.map(function(r){return '<div class="hi2">'+esc(r)+'</div>';}).join("");
-  api("A songwriter searched rhymes for: "+ws.join(", ")+". Give 3 short songwriting tips based on these words. Use a bullet before each. Plain text only.",350,function(notes,err){
+  callAPI("/api/notes",{words:ws},function(notes,err){
     var el=document.getElementById("hn");
-    if(err||!notes){el.innerHTML='<div class="hi2">Keep exploring - there is a great song in these words.</div>';return;}
+    if(err||!notes){el.innerHTML='<div class="hi2">Keep exploring - great song in these words.</div>';return;}
     el.innerHTML=notes.split("\n").filter(function(l){return l.trim();}).map(function(l){return '<div class="hi2">'+esc(l.trim())+'</div>';}).join("");
   });
 });
+
 document.getElementById("dd").addEventListener("click",function(){
   var t="WRITERS ROOM - HIGHLIGHTS REPORT\nDate: "+new Date().toLocaleString()+"\n\n";
   t+="WORDS SEARCHED:\n";
@@ -234,6 +242,7 @@ document.getElementById("dd").addEventListener("click",function(){
   t+="\n\nGenerated by Writers Room";
   save(t,"writers-room-highlights.txt");
 });
+
 document.getElementById("ns").addEventListener("click",function(){
   log=[];
   chat.innerHTML='<div class="bs fi"><span>New session \u2014 what word are we working with?</span></div>';
@@ -241,6 +250,7 @@ document.getElementById("ns").addEventListener("click",function(){
   ov.classList.remove("open");
   wi.focus();
 });
+
 function save(content,filename){
   var b=new Blob([content],{type:"text/plain;charset=utf-8"});
   var u=URL.createObjectURL(b);
