@@ -1,13 +1,5 @@
 {
   "version": 2,
-  "functions": {
-    "api/rhyme.js": {
-      "runtime": "edge"
-    },
-    "api/notes.js": {
-      "runtime": "edge"
-    }
-  },
   "routes": [
     {
       "src": "/api/rhyme",
