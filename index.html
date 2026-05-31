@@ -3,37 +3,774 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Local Visibility Audit — Client Report Generator</title>
+<title>Writer's Room — Rhyme Finder</title>
 <style>
-  @import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,900&family=Spline+Sans+Mono:wght@400;500&family=Spline+Sans:wght@400;500;600&display=swap');
+  @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=DM+Sans:wght@300;400;500&display=swap');
 
-  :root{
-    --ink:#10100e; --paper:#f6f3ea; --paper2:#ece7d8;
-    --accent:#e7522b; --accent2:#1d6b4a; --gold:#caa45a;
-    --line:#cdc6b4; --muted:#6d685a;
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: #07070f;
+    color: #d4d4e8;
+    font-family: 'DM Sans', sans-serif;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 0 16px 100px;
+    background-image:
+      radial-gradient(ellipse at 15% 40%, #1a0a4a18 0%, transparent 55%),
+      radial-gradient(ellipse at 85% 20%, #0a1a3a22 0%, transparent 50%);
   }
-  *{box-sizing:border-box;margin:0;padding:0}
-  body{background:var(--paper);color:var(--ink);font-family:'Spline Sans',sans-serif;-webkit-font-smoothing:antialiased;line-height:1.5}
-  .wrap{max-width:1120px;margin:0 auto;padding:0 24px}
 
-  /* ── Top bar ── */
-  header{border-bottom:2px solid var(--ink);background:var(--paper)}
-  .bar{display:flex;justify-content:space-between;align-items:center;padding:18px 24px;max-width:1120px;margin:0 auto}
-  .brand{font-family:'Fraunces';font-weight:900;font-size:22px;letter-spacing:-.5px}
-  .brand span{color:var(--accent)}
-  .tag{font-family:'Spline Sans Mono';font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:2px}
+  /* HEADER */
+  header {
+    width: 100%;
+    max-width: 460px;
+    text-align: center;
+    padding: 32px 0 20px;
+    position: sticky;
+    top: 0;
+    background: linear-gradient(180deg, #07070f 70%, transparent);
+    z-index: 10;
+  }
 
-  /* ── Hero / control panel ── */
-  .panel{padding:46px 0 36px;border-bottom:1px solid var(--line)}
-  .panel h1{font-family:'Fraunces';font-weight:900;font-size:clamp(30px,5vw,52px);line-height:1.02;letter-spacing:-1.5px;max-width:780px}
-  .panel h1 em{font-style:italic;color:var(--accent)}
-  .panel p.sub{margin-top:14px;color:var(--muted);font-size:16px;max-width:620px}
+  header h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: 26px;
+    font-weight: 900;
+    background: linear-gradient(90deg, #ff6eb4, #a78bfa, #7ec8e3);
+    background-size: 200% auto;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    animation: shimmer 4s linear infinite;
+    letter-spacing: -0.5px;
+  }
 
-  .form{margin-top:30px;display:grid;grid-template-columns:1.4fr 1fr auto;gap:14px;align-items:end}
-  @media(max-width:760px){.form{grid-template-columns:1fr}}
-  .field label{display:block;font-family:'Spline Sans Mono';font-size:11px;text-transform:uppercase;letter-spacing:1.5px;color:var(--muted);margin-bottom:6px}
-  .field input,.field select{width:100%;padding:13px 14px;border:1.5px solid var(--ink);background:var(--paper);font-family:'Spline Sans';font-size:15px;border-radius:0;color:var(--ink)}
-  .field input:focus,.field select:focus{outline:none;background:#fff;box-shadow:3px 3px 0 var(--ink)}
+  header p {
+    font-size: 12px;
+    color: #444;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    margin-top: 4px;
+  }
+
+  .divider {
+    height: 1px;
+    background: linear-gradient(90deg, transparent, #ffffff11, transparent);
+    margin-top: 14px;
+  }
+
+  /* CHAT AREA */
+  #chat {
+    width: 100%;
+    max-width: 460px;
+    flex: 1;
+    padding: 16px 0 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+
+  /* BUBBLES */
+  .bubble-user {
+    display: flex;
+    justify-content: flex-end;
+  }
+
+  .bubble-user span {
+    background: linear-gradient(135deg, #2d1b69, #1a0a4a);
+    border: 1px solid #6d28d966;
+    border-radius: 16px 0 16px 16px;
+    padding: 11px 16px;
+    max-width: 78%;
+    font-size: 15px;
+    color: #e9d5ff;
+    line-height: 1.5;
+  }
+
+  .bubble-ai {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .bubble-ai .label {
+    font-size: 11px;
+    color: #a78bfa;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    padding-left: 4px;
+  }
+
+  .bubble-ai .content {
+    background: linear-gradient(135deg, #111127, #0d0d22);
+    border: 1px solid #a78bfa33;
+    border-radius: 0 16px 16px 16px;
+    padding: 14px 16px;
+    font-size: 14px;
+    line-height: 1.8;
+    color: #d4d4e8;
+    box-shadow: 0 2px 24px #a78bfa0d;
+  }
+
+  .bubble-ai .content .rhyme-word {
+    display: inline-block;
+    background: #a78bfa18;
+    border: 1px solid #a78bfa44;
+    border-radius: 8px;
+    padding: 2px 10px;
+    margin: 3px 4px 3px 0;
+    color: #c4b5fd;
+    font-size: 14px;
+    font-weight: 500;
+    letter-spacing: 0.3px;
+  }
+
+  .bubble-system {
+    text-align: center;
+  }
+
+  .bubble-system span {
+    background: #ffffff07;
+    border: 1px solid #ffffff12;
+    border-radius: 20px;
+    padding: 6px 16px;
+    font-size: 12px;
+    color: #555;
+    display: inline-block;
+  }
+
+  /* TYPING */
+  .typing-dots span {
+    display: inline-block;
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: #a78bfa;
+    margin: 0 2px;
+    animation: bounce 1.2s ease-in-out infinite;
+  }
+  .typing-dots span:nth-child(2) { animation-delay: 0.2s; }
+  .typing-dots span:nth-child(3) { animation-delay: 0.4s; }
+
+  /* INPUT BAR */
+  #input-bar {
+    position: fixed;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 100%;
+    max-width: 460px;
+    padding: 12px 16px 24px;
+    background: linear-gradient(0deg, #07070f 65%, transparent);
+    backdrop-filter: blur(10px);
+  }
+
+  .input-wrap {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+  }
+
+  #word-input {
+    flex: 1;
+    background: #0d0d20;
+    border: 1px solid #2d2d5a;
+    border-radius: 14px;
+    padding: 12px 16px;
+    color: #d4d4e8;
+    font-size: 16px;
+    font-family: 'DM Sans', sans-serif;
+    transition: border-color 0.2s;
+  }
+
+  #word-input:focus { outline: none; border-color: #7c3aed88; }
+  #word-input::placeholder { color: #333; }
+
+  #send-btn {
+    width: 46px; height: 46px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #7c3aed, #4f46e5);
+    border: none;
+    color: #fff;
+    font-size: 20px;
+    cursor: pointer;
+    flex-shrink: 0;
+    transition: all 0.2s;
+    box-shadow: 0 0 18px #7c3aed55;
+    display: flex; align-items: center; justify-content: center;
+  }
+
+  #send-btn:disabled {
+    background: #1a1a3a;
+    box-shadow: none;
+    cursor: not-allowed;
+    opacity: 0.5;
+  }
+
+  /* END SESSION */
+  #end-btn-wrap {
+    text-align: center;
+    margin-top: 10px;
+  }
+
+  #end-btn {
+    background: transparent;
+    border: 1px solid #ff6eb444;
+    border-radius: 16px;
+    padding: 6px 22px;
+    color: #ff6eb4;
+    font-size: 12px;
+    cursor: pointer;
+    font-family: 'DM Sans', sans-serif;
+    letter-spacing: 0.5px;
+    transition: all 0.2s;
+  }
+
+  #end-btn:hover { background: #ff6eb411; }
+
+  /* MODAL */
+  #modal-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: #000000cc;
+    z-index: 100;
+    backdrop-filter: blur(8px);
+    align-items: flex-end;
+    justify-content: center;
+  }
+
+  #modal-overlay.open { display: flex; }
+
+  #modal {
+    width: 100%;
+    max-width: 460px;
+    background: linear-gradient(180deg, #111128 0%, #07070f 100%);
+    border: 1px solid #2d2d5a;
+    border-radius: 24px 24px 0 0;
+    padding: 28px 22px 44px;
+    max-height: 88vh;
+    overflow-y: auto;
+    animation: slideUp 0.3s ease;
+  }
+
+  @keyframes slideUp {
+    from { transform: translateY(40px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+  }
+
+  .modal-title {
+    text-align: center;
+    margin-bottom: 22px;
+  }
+
+  .modal-title .icon { font-size: 32px; display: block; margin-bottom: 6px; }
+
+  .modal-title h2 {
+    font-family: 'Playfair Display', serif;
+    font-size: 22px;
+    color: #fff;
+    font-weight: 700;
+  }
+
+  .modal-title p { color: #555; font-size: 13px; margin-top: 4px; }
+
+  .modal-btn {
+    width: 100%;
+    border-radius: 14px;
+    padding: 14px;
+    font-size: 14px;
+    font-family: 'DM Sans', sans-serif;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    margin-bottom: 12px;
+  }
+
+  .btn-free {
+    background: #ffffff09;
+    border: 1px solid #ffffff1a;
+    color: #888;
+  }
+
+  .btn-free:hover { background: #ffffff14; }
+
+  .highlight-box {
+    background: linear-gradient(135deg, #1a0a4a, #0a1a3a);
+    border: 1px solid #a78bfa44;
+    border-radius: 16px;
+    padding: 18px;
+    margin-bottom: 12px;
+  }
+
+  .highlight-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 14px;
+  }
+
+  .highlight-header .hl-icon { font-size: 22px; }
+
+  .highlight-header .hl-text h3 {
+    color: #a78bfa;
+    font-family: 'Playfair Display', serif;
+    font-size: 16px;
+  }
+
+  .highlight-header .hl-text p { color: #555; font-size: 12px; }
+  .highlight-header .price { margin-left: auto; color: #6ee7b7; font-size: 20px; font-weight: 700; }
+
+  /* unlock form */
+  #unlock-section { margin-top: 10px; }
+
+  .unlock-info {
+    background: #ffffff08;
+    border: 1px solid #ffffff12;
+    border-radius: 10px;
+    padding: 12px 14px;
+    font-size: 13px;
+    color: #777;
+    line-height: 1.7;
+    margin-bottom: 12px;
+    text-align: center;
+  }
+
+  .unlock-info strong { color: #e9d5ff; }
+
+  #code-input {
+    width: 100%;
+    background: #0d0d20;
+    border: 1px solid #2d2d5a;
+    border-radius: 12px;
+    padding: 12px 16px;
+    color: #d4d4e8;
+    font-size: 15px;
+    font-family: 'DM Sans', sans-serif;
+    text-align: center;
+    letter-spacing: 3px;
+    margin-bottom: 10px;
+  }
+
+  #code-input:focus { outline: none; border-color: #7c3aed88; }
+  #code-input::placeholder { letter-spacing: 1px; color: #333; }
+
+  .btn-unlock {
+    background: linear-gradient(135deg, #10b981, #059669);
+    border: none;
+    color: #fff;
+    font-weight: 500;
+    box-shadow: 0 4px 20px #10b98133;
+  }
+
+  .btn-unlock:hover { box-shadow: 0 4px 28px #10b98155; }
+
+  #unlock-error {
+    text-align: center;
+    color: #f87171;
+    font-size: 12px;
+    margin-top: -6px;
+    margin-bottom: 8px;
+    display: none;
+  }
+
+  /* highlights content */
+  #highlights-content { display: none; }
+
+  .hl-section { margin-bottom: 14px; }
+
+  .hl-section-label {
+    font-size: 11px;
+    color: #a78bfa;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin-bottom: 8px;
+  }
+
+  .hl-item {
+    background: #ffffff07;
+    border-left: 2px solid #a78bfa44;
+    border-radius: 0 8px 8px 0;
+    padding: 6px 10px;
+    font-size: 13px;
+    color: #bbb;
+    margin-bottom: 5px;
+    line-height: 1.5;
+  }
+
+  .btn-new {
+    background: transparent;
+    border: 1px solid #2d2d5a;
+    color: #555;
+  }
+
+  /* ANIMATIONS */
+  @keyframes shimmer {
+    0% { background-position: 0% center; }
+    100% { background-position: 200% center; }
+  }
+
+  @keyframes bounce {
+    0%, 80%, 100% { transform: translateY(0); }
+    40% { transform: translateY(-5px); }
+  }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .fade-in { animation: fadeUp 0.35s ease; }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Writer's Room</h1>
+  <p>Rhyme Finder</p>
+  <div class="divider"></div>
+</header>
+
+<div id="chat">
+  <div class="bubble-system fade-in">
+    <span>Enter any word below — get a full rhyme list instantly ✍️</span>
+  </div>
+</div>
+
+<div id="input-bar">
+  <div class="input-wrap">
+    <input id="word-input" type="text" placeholder="Enter a word to rhyme..." autocomplete="off" autocorrect="off" spellcheck="false" />
+    <button id="send-btn">↑</button>
+  </div>
+  <div id="end-btn-wrap" style="display:none;">
+    <button id="end-btn">End Session &amp; Get Highlights →</button>
+  </div>
+</div>
+
+<!-- MODAL -->
+<div id="modal-overlay">
+  <div id="modal">
+    <div class="modal-title">
+      <span class="icon">🎵</span>
+      <h2>Session Complete</h2>
+      <p id="modal-count">0 rhyme lookups</p>
+    </div>
+
+    <!-- Free download -->
+    <button class="modal-btn btn-free" onclick="downloadFree()">📄 Download Transcript — Free</button>
+
+    <!-- Paid highlights -->
+    <div class="highlight-box">
+      <div class="highlight-header">
+        <span class="hl-icon">✨</span>
+        <div class="hl-text">
+          <h3>Session Highlights</h3>
+          <p>Top rhymes • patterns • word clusters</p>
+        </div>
+        <span class="price">$2</span>
+      </div>
+
+      <div id="unlock-section">
+        <div class="unlock-info">
+          Text <strong>(602) 690-0836</strong> for $2 support.<br/>
+          You'll receive a secure <strong>Cash App $name</strong> + your unlock code after payment.
+        </div>
+        <input id="code-input" type="text" placeholder="Enter unlock code" maxlength="12" />
+        <div id="unlock-error">Invalid code. Try again.</div>
+        <button class="modal-btn btn-unlock" onclick="tryUnlock()">✅ Unlock &amp; Download Highlights</button>
+      </div>
+
+      <div id="highlights-content">
+        <div class="hl-section">
+          <div class="hl-section-label">🔤 All Words Searched</div>
+          <div id="hl-words"></div>
+        </div>
+        <div class="hl-section">
+          <div class="hl-section-label">🎯 Top Rhyme Picks</div>
+          <div id="hl-top"></div>
+        </div>
+        <div class="hl-section">
+          <div class="hl-section-label">💡 Writing Notes</div>
+          <div id="hl-notes"></div>
+        </div>
+        <button class="modal-btn btn-unlock" onclick="downloadFull()" style="margin-top:8px;">⬇️ Download Full Report</button>
+      </div>
+    </div>
+
+    <button class="modal-btn btn-new" onclick="newSession()">🎵 Start New Session</button>
+  </div>
+</div>
+
+<script>
+// ─── STATE ────────────────────────────────────────────────
+const UNLOCK_CODE = "WRROOM2024"; // change this to match what you text people
+const API_KEY_PLACEHOLDER = ""; // leave blank — handled server-side via proxy OR fill in your key
+
+let sessionLog = []; // { word, rhymes[] }
+let isLoading = false;
+
+// ─── ELEMENTS ─────────────────────────────────────────────
+const chat = document.getElementById("chat");
+const input = document.getElementById("word-input");
+const sendBtn = document.getElementById("send-btn");
+const endBtnWrap = document.getElementById("end-btn-wrap");
+const modal = document.getElementById("modal-overlay");
+
+// ─── SEND ─────────────────────────────────────────────────
+async function send() {
+  const word = input.value.trim();
+  if (!word || isLoading) return;
+  input.value = "";
+  isLoading = true;
+  sendBtn.disabled = true;
+
+  appendUser(word);
+  const typingId = appendTyping();
+
+  try {
+    const rhymes = await getRhymes(word);
+    removeTyping(typingId);
+    appendRhymes(word, rhymes);
+    sessionLog.push({ word, rhymes });
+    endBtnWrap.style.display = "block";
+  } catch (e) {
+    removeTyping(typingId);
+    appendSystem("Something went wrong. Try again.");
+  }
+
+  isLoading = false;
+  sendBtn.disabled = false;
+  input.focus();
+}
+
+// ─── API CALL ─────────────────────────────────────────────
+async function getRhymes(word) {
+  const prompt = `Give me a complete rhyming word list for the word "${word}".
+
+Return ONLY a plain comma-separated list of rhyming words and phrases — no introduction, no explanation, no numbering, no categories. Just the words separated by commas.
+
+Include: perfect rhymes, near rhymes, slant rhymes, and multi-syllable rhyming phrases. Aim for 25–40 options. Single words and short phrases both welcome.`;
+
+  const res = await fetch("https://api.anthropic.com/v1/messages", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "x-api-key": window.__ANTHROPIC_KEY || "",
+      "anthropic-version": "2023-06-01",
+      "anthropic-dangerous-direct-browser-access": "true"
+    },
+    body: JSON.stringify({
+      model: "claude-haiku-4-5-20251001",
+      max_tokens: 600,
+      messages: [{ role: "user", content: prompt }]
+    })
+  });
+
+  const data = await res.json();
+  const text = data.content?.[0]?.text || "";
+  // Parse comma-separated list
+  return text.split(",").map(w => w.trim().replace(/\.$/, "")).filter(Boolean);
+}
+
+// ─── DOM HELPERS ──────────────────────────────────────────
+function appendUser(word) {
+  const el = document.createElement("div");
+  el.className = "bubble-user fade-in";
+  el.innerHTML = `<span>🔍 Rhymes for "<strong>${escHtml(word)}</strong>"</span>`;
+  chat.appendChild(el);
+  scroll();
+}
+
+function appendTyping() {
+  const id = "typing-" + Date.now();
+  const el = document.createElement("div");
+  el.className = "bubble-ai fade-in";
+  el.id = id;
+  el.innerHTML = `
+    <div class="label">Composing your list...</div>
+    <div class="content">
+      <div class="typing-dots"><span></span><span></span><span></span></div>
+    </div>`;
+  chat.appendChild(el);
+  scroll();
+  return id;
+}
+
+function removeTyping(id) {
+  document.getElementById(id)?.remove();
+}
+
+function appendRhymes(word, rhymes) {
+  const el = document.createElement("div");
+  el.className = "bubble-ai fade-in";
+  const chips = rhymes.map(r => `<span class="rhyme-word">${escHtml(r)}</span>`).join("");
+  el.innerHTML = `
+    <div class="label">Rhymes for "${escHtml(word)}"</div>
+    <div class="content">${chips}</div>`;
+  chat.appendChild(el);
+  scroll();
+}
+
+function appendSystem(msg) {
+  const el = document.createElement("div");
+  el.className = "bubble-system fade-in";
+  el.innerHTML = `<span>${msg}</span>`;
+  chat.appendChild(el);
+  scroll();
+}
+
+function scroll() {
+  setTimeout(() => window.scrollTo({ top: document.body.scrollHeight, behavior: "smooth" }), 50);
+}
+
+function escHtml(str) {
+  return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+}
+
+// ─── END SESSION ──────────────────────────────────────────
+document.getElementById("end-btn").onclick = () => {
+  document.getElementById("modal-count").textContent = `${sessionLog.length} rhyme lookup${sessionLog.length !== 1 ? "s" : ""}`;
+  modal.classList.add("open");
+};
+
+function closeModal() { modal.classList.remove("open"); }
+
+modal.addEventListener("click", e => { if (e.target === modal) closeModal(); });
+
+// ─── FREE DOWNLOAD ────────────────────────────────────────
+function downloadFree() {
+  let txt = "WRITER'S ROOM — SESSION TRANSCRIPT\n";
+  txt += `Date: ${new Date().toLocaleString()}\n`;
+  txt += "━".repeat(40) + "\n\n";
+  sessionLog.forEach(entry => {
+    txt += `WORD: ${entry.word}\n`;
+    txt += `RHYMES: ${entry.rhymes.join(", ")}\n\n`;
+  });
+  saveFile(txt, "writers-room-transcript.txt");
+}
+
+// ─── UNLOCK ───────────────────────────────────────────────
+async function tryUnlock() {
+  const code = document.getElementById("code-input").value.trim().toUpperCase();
+  const errEl = document.getElementById("unlock-error");
+
+  if (code !== UNLOCK_CODE) {
+    errEl.style.display = "block";
+    document.getElementById("code-input").style.borderColor = "#f8717166";
+    return;
+  }
+
+  errEl.style.display = "none";
+  document.getElementById("unlock-section").style.display = "none";
+
+  // Build highlights
+  await buildHighlights();
+  document.getElementById("highlights-content").style.display = "block";
+}
+
+async function buildHighlights() {
+  // Collect all words
+  const allWords = sessionLog.map(e => e.word);
+  document.getElementById("hl-words").innerHTML = allWords.map(w => `<div class="hl-item">${escHtml(w)}</div>`).join("");
+
+  // Top rhymes = all unique rhymes across session, sorted by frequency
+  const freq = {};
+  sessionLog.forEach(e => e.rhymes.forEach(r => { freq[r] = (freq[r] || 0) + 1; }));
+  const topRhymes = Object.entries(freq).sort((a, b) => b[1] - a[1]).slice(0, 12).map(e => e[0]);
+  document.getElementById("hl-top").innerHTML = topRhymes.map(r => `<div class="hl-item">${escHtml(r)}</div>`).join("");
+
+  // Writing notes via AI
+  if (sessionLog.length > 0) {
+    try {
+      const prompt = `A songwriter looked up rhymes for these words: ${allWords.join(", ")}. In 3 short bullet points (no intro), give practical songwriting tips based on this word theme. Plain text, use • as bullet.`;
+      const res = await fetch("https://api.anthropic.com/v1/messages", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "x-api-key": window.__ANTHROPIC_KEY || "",
+          "anthropic-version": "2023-06-01",
+          "anthropic-dangerous-direct-browser-access": "true"
+        },
+        body: JSON.stringify({
+          model: "claude-haiku-4-5-20251001",
+          max_tokens: 300,
+          messages: [{ role: "user", content: prompt }]
+        })
+      });
+      const data = await res.json();
+      const notes = data.content?.[0]?.text || "";
+      document.getElementById("hl-notes").innerHTML = notes
+        .split("\n").filter(l => l.trim())
+        .map(l => `<div class="hl-item">${escHtml(l.trim())}</div>`).join("");
+    } catch {
+      document.getElementById("hl-notes").innerHTML = `<div class="hl-item">Keep exploring your word themes — there's a song in there.</div>`;
+    }
+  }
+}
+
+// ─── FULL DOWNLOAD ────────────────────────────────────────
+function downloadFull() {
+  let txt = "WRITER'S ROOM — HIGHLIGHTS REPORT\n";
+  txt += `Date: ${new Date().toLocaleString()}\n`;
+  txt += "━".repeat(40) + "\n\n";
+
+  txt += "WORDS SEARCHED:\n";
+  sessionLog.forEach(e => { txt += `  • ${e.word}\n`; });
+
+  txt += "\nFULL RHYME LISTS:\n";
+  sessionLog.forEach(e => {
+    txt += `\n${e.word.toUpperCase()}\n${e.rhymes.join(", ")}\n`;
+  });
+
+  const notesEl = document.getElementById("hl-notes");
+  if (notesEl.innerText.trim()) {
+    txt += "\n\nWRITING NOTES:\n" + notesEl.innerText.trim();
+  }
+
+  txt += "\n\n━".repeat(40);
+  txt += "\nGenerated by Writer's Room — writerssroom.com";
+
+  saveFile(txt, "writers-room-highlights.txt");
+}
+
+function saveFile(content, filename) {
+  const blob = new Blob([content], { type: "text/plain" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url; a.download = filename; a.click();
+  URL.revokeObjectURL(url);
+}
+
+// ─── NEW SESSION ──────────────────────────────────────────
+function newSession() {
+  sessionLog = [];
+  chat.innerHTML = `<div class="bubble-system fade-in"><span>New session started — what word are we working with? ✍️</span></div>`;
+  endBtnWrap.style.display = "none";
+  closeModal();
+  document.getElementById("code-input").value = "";
+  document.getElementById("unlock-section").style.display = "block";
+  document.getElementById("highlights-content").style.display = "none";
+  document.getElementById("unlock-error").style.display = "none";
+  document.getElementById("code-input").style.borderColor = "";
+  input.focus();
+}
+
+// ─── KEY BINDING ──────────────────────────────────────────
+input.addEventListener("keydown", e => { if (e.key === "Enter") send(); });
+sendBtn.addEventListener("click", send);
+
+// ─── API KEY INJECTION ────────────────────────────────────
+// To deploy: add this line to your page or server config:
+// window.__ANTHROPIC_KEY = "sk-ant-...your-key-here...";
+// Or set it here directly (not recommended for public sites):
+// window.__ANTHROPIC_KEY = "YOUR_KEY";
+</script>
+</body>
+</html>
   .go{padding:14px 26px;background:var(--ink);color:var(--paper);border:none;font-family:'Spline Sans Mono';font-size:13px;text-transform:uppercase;letter-spacing:2px;cursor:pointer;transition:.15s;white-space:nowrap}
   .go:hover{background:var(--accent);transform:translate(-2px,-2px);box-shadow:4px 4px 0 var(--ink)}
 
