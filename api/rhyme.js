@@ -1,21 +1,26 @@
-export default async function handler(req, res) {
-  if (req.method !== "POST") {
-    return res.status(405).json({ error: "Method not allowed" });
-  }
+module.exports = async function handler(req, res) {
+  res.setHeader("Access-Control-Allow-Origin", "*");
+  res.setHeader("Access-Control-Allow-Methods", "POST, OPTIONS");
+  res.setHeader("Access-Control-Allow-Headers", "Content-Type");
 
-  const { word } = req.body || {};
-  if (!word || typeof word !== "string" || word.trim().length === 0) {
-    return res.status(400).json({ error: "No word provided" });
-  }
+  if (req.method === "OPTIONS") return res.status(200).end();
+  if (req.method !== "POST") return res.status(405).json({ error: "Method not allowed" });
 
-  const prompt = "Rhyming words for the word: " + word.trim() + ". Respond with ONLY a comma-separated list of words and short phrases. Nothing else. No intro, no explanation, no numbers, no categories. Example: never, clever, forever, together, endeavor, whether. Give 30 to 40 rhymes.";
+  const apiKey = process.env.ANTHROPIC_API_KEY;
+  if (!apiKey) return res.status(500).json({ error: "API key not configured on server" });
+
+  const body = req.body || {};
+  const word = typeof body.word === "string" ? body.word.trim() : "";
+  if (!word) return res.status(400).json({ error: "No word provided" });
+
+  const prompt = "Rhyming words for: " + word + ". Reply with ONLY a comma-separated list. No intro, no explanation, no numbers. Just words like: never, clever, forever, together, endeavor, whether. Give 30 to 40 rhymes.";
 
   try {
     const response = await fetch("https://api.anthropic.com/v1/messages", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        "x-api-key": process.env.ANTHROPIC_API_KEY,
+        "x-api-key": apiKey,
         "anthropic-version": "2023-06-01"
       },
       body: JSON.stringify({
@@ -24,17 +29,11 @@ export default async function handler(req, res) {
         messages: [{ role: "user", content: prompt }]
       })
     });
-
     const data = await response.json();
-
-    if (data.error) {
-      return res.status(500).json({ error: data.error.message });
-    }
-
+    if (data.error) return res.status(500).json({ error: data.error.message });
     const text = data.content && data.content[0] ? data.content[0].text : "";
-    return res.status(200).json({ text });
-
+    return res.status(200).json({ text: text });
   } catch (err) {
     return res.status(500).json({ error: err.message || "Server error" });
   }
-}
+};
